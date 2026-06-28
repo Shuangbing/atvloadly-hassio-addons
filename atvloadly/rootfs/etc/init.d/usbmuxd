@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+DAEMON=/usr/sbin/usbmuxd
+DAEMON_OPTS="--nousb"
+
+start_it_up() {
+  ${DAEMON} --daemonize ${DAEMON_OPTS}
+}
+
+shut_it_down() {
+  ${DAEMON} --force-exit
+}
+
+case "$1" in
+  start)
+    start_it_up
+    ;;
+  stop)
+    shut_it_down
+    ;;
+  restart)
+    shut_it_down || true
+    while pgrep -f "${DAEMON}" > /dev/null; do
+      sleep 1
+    done
+    start_it_up
+    ;;
+  *)
+    echo "Usage: /etc/init.d/usbmuxd {start|stop|restart}" >&2
+    exit 2
+    ;;
+esac

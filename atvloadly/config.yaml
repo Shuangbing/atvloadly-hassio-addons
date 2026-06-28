@@ -1,0 +1,36 @@
+name: ATVLoadly
+slug: atvloadly
+description: Run ATVLoadly inside Home Assistant with a sidebar entry.
+version: 0.4.5-ha2
+url: https://github.com/Shuangbing/atvloadly-hassio-addons
+arch:
+  - amd64
+startup: services
+boot: auto
+init: false
+host_network: true
+apparmor: false
+ingress: true
+ingress_port: 8099
+ingress_stream: true
+ingress_entry: /
+panel_icon: mdi:television-play
+panel_title: ATVLoadly
+ports: {}
+ports_description: {}
+options:
+  service_port: 5533
+  language: zh_cn
+  log_level: info
+  http_proxy: ""
+  https_proxy: ""
+  developer_disk_image_cn_proxy: https://mirror.ghproxy.com
+  developer_disk_image_image_source: https://raw.githubusercontent.com/bitxeno/DeveloperDiskImages/main
+schema:
+  service_port: port
+  language: str
+  log_level: str
+  http_proxy: str
+  https_proxy: str
+  developer_disk_image_cn_proxy: str
+  developer_disk_image_image_source: str
