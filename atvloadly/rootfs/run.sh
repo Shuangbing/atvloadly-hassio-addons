@@ -99,11 +99,11 @@ server {
         proxy_set_header Connection "upgrade";
         sub_filter_once off;
         sub_filter_types text/html;
-        sub_filter 'href="/assets/' 'href="./assets/';
-        sub_filter 'src="/assets/' 'src="./assets/';
-        sub_filter 'href="/img/' 'href="./img/';
-        sub_filter 'src="/img/' 'src="./img/';
-        sub_filter '</head>' '<script src="./ingress-shim.js"></script></head>';
+        sub_filter 'href="/assets/' 'href="\$http_x_ingress_path/assets/';
+        sub_filter 'src="/assets/' 'src="\$http_x_ingress_path/assets/';
+        sub_filter 'href="/img/' 'href="\$http_x_ingress_path/img/';
+        sub_filter 'src="/img/' 'src="\$http_x_ingress_path/img/';
+        sub_filter '</head>' '<base href="\$http_x_ingress_path/"><script src="\$http_x_ingress_path/ingress-shim.js"></script></head>';
         proxy_pass http://127.0.0.1:${service_port};
     }
 }
