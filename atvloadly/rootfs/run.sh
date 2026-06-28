@@ -99,16 +99,12 @@ server {
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript text/javascript;
-        sub_filter 'href="/assets/' 'href="\$http_x_ingress_path/assets/';
-        sub_filter 'src="/assets/' 'src="\$http_x_ingress_path/assets/';
-        sub_filter 'href="/img/' 'href="\$http_x_ingress_path/img/';
-        sub_filter 'src="/img/' 'src="\$http_x_ingress_path/img/';
-        sub_filter '"/assets/' '"\$http_x_ingress_path/assets/';
-        sub_filter "'/assets/" "'\$http_x_ingress_path/assets/";
-        sub_filter '"/img/' '"\$http_x_ingress_path/img/';
-        sub_filter "'/img/" "'\$http_x_ingress_path/img/";
-        sub_filter '</head>' '<base href="\$http_x_ingress_path/"><script src="\$http_x_ingress_path/ingress-shim.js"></script></head>';
+        sub_filter_types text/html;
+        sub_filter '<title>atvloadly</title>' '<title>atvloadly</title><script>(function(){var p=window.location.pathname||"/";if(!p.endsWith("/"))p+="/";var b=document.createElement("base");b.href=p;document.head.appendChild(b);}())</script><script src="ingress-shim.js"></script>';
+        sub_filter 'href="/assets/' 'href="assets/';
+        sub_filter 'src="/assets/' 'src="assets/';
+        sub_filter 'href="/img/' 'href="img/';
+        sub_filter 'src="/img/' 'src="img/';
         proxy_pass http://127.0.0.1:${service_port};
     }
 }
