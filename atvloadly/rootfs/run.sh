@@ -91,6 +91,7 @@ server {
         allow 172.30.32.2;
         deny all;
 
+        proxy_set_header Accept-Encoding "";
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
@@ -98,11 +99,15 @@ server {
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
         sub_filter_once off;
-        sub_filter_types text/html;
+        sub_filter_types text/html text/css application/javascript text/javascript;
         sub_filter 'href="/assets/' 'href="\$http_x_ingress_path/assets/';
         sub_filter 'src="/assets/' 'src="\$http_x_ingress_path/assets/';
         sub_filter 'href="/img/' 'href="\$http_x_ingress_path/img/';
         sub_filter 'src="/img/' 'src="\$http_x_ingress_path/img/';
+        sub_filter '"/assets/' '"\$http_x_ingress_path/assets/';
+        sub_filter "'/assets/" "'\$http_x_ingress_path/assets/";
+        sub_filter '"/img/' '"\$http_x_ingress_path/img/';
+        sub_filter "'/img/" "'\$http_x_ingress_path/img/";
         sub_filter '</head>' '<base href="\$http_x_ingress_path/"><script src="\$http_x_ingress_path/ingress-shim.js"></script></head>';
         proxy_pass http://127.0.0.1:${service_port};
     }
