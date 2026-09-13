@@ -111,7 +111,7 @@ server {
         sub_filter '"/assets/' '"./';
         sub_filter "'/assets/" "'./";
         # ingress_entry: / can leave an extra leading slash before API paths.
-        rewrite ^//+(.*)$ /$1 break;
+        rewrite ^//+(.*)$ /\$1 break;
         proxy_pass http://127.0.0.1:${service_port};
     }
 }
