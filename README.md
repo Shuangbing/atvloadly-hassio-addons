@@ -11,10 +11,12 @@ OS / Home Assistant Supervised.
 
 ## Highlights
 
-- Uses the prebuilt upstream release binary `v0.4.5` for `linux/amd64`
+- Uses the prebuilt upstream release binary `v0.4.10` for `linux/amd64`
 - Runs on `host_network` so Bonjour / mDNS discovery can work properly
 - Exposes ATVLoadly on the LAN, default port `5533`
 - Keeps Home Assistant sidebar access through Ingress
+- Rewrites code-split asset URLs so the SPA also works behind Ingress
+- Automatically restarts the service after an unexpected process exit
 
 ## Add repository to Home Assistant
 
@@ -31,4 +33,4 @@ Then install the `ATVLoadly` add-on from the store.
 
 - Upstream project: [bitxeno/atvloadly](https://github.com/bitxeno/atvloadly)
 - Upstream release used by this add-on:
-  [v0.4.5](https://github.com/bitxeno/atvloadly/releases/tag/v0.4.5)
+  [v0.4.10](https://github.com/bitxeno/atvloadly/releases/tag/v0.4.10)

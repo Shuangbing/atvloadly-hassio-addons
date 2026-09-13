@@ -102,4 +102,6 @@
   patchPropertySetter(window.HTMLImageElement, "src");
   patchPropertySetter(window.HTMLAnchorElement, "href");
   patchPropertySetter(window.HTMLFormElement, "action");
+  patchPropertySetter(window.HTMLScriptElement, "src");
+  patchPropertySetter(window.HTMLLinkElement, "href");
 })();

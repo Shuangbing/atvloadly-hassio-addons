@@ -1,6 +1,6 @@
 # ATVLoadly for Home Assistant
 
-This custom add-on packages the prebuilt `atvloadly` `v0.4.5` Linux
+This custom add-on packages the prebuilt `atvloadly` `v0.4.10` Linux
 `amd64` release for Home Assistant.
 
 Repository URL:
@@ -25,6 +25,9 @@ https://github.com/Shuangbing/atvloadly-hassio-addons
 - Default LAN port is `5533`
 - `service_port` is configurable, but must not be `58080`
 - Sidebar access still works through Home Assistant Ingress
+- Ingress rewrites the SPA's code-split asset URLs for nested paths
+- The add-on restarts `atvloadly` automatically after an unexpected exit,
+  using a short exponential backoff
 
 ## Install as a local add-on
 

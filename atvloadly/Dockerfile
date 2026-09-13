@@ -3,7 +3,7 @@ FROM ${BUILD_FROM}
 
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
-ENV ATVLOADLY_VERSION=v0.4.5
+ENV ATVLOADLY_VERSION=v0.4.10
 ENV ATVLOADLY_BIN_NAME=atvloadly-linux-amd64
 ENV APP_HOME=/opt/atvloadly
 
@@ -39,7 +39,7 @@ RUN cd /tmp \
     && rm -f /tmp/*.deb /tmp/*.tar.gz
 
 RUN cd /tmp \
-    && wget -q https://github.com/bitxeno/PlumeImpactor/releases/download/v2.2.3-patch.4/plumesign-linux-x86_64.tar.gz \
+    && wget -q https://github.com/bitxeno/PlumeImpactor/releases/download/v2.2.3-patch.5/plumesign-linux-x86_64.tar.gz \
     && tar zxf plumesign-linux-x86_64.tar.gz \
     && install -m 0755 plumesign-linux-x86_64 /usr/bin/plumesign \
     && rm -f /tmp/*.tar.gz /tmp/plumesign-linux-x86_64

@@ -99,12 +99,16 @@ server {
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
         sub_filter_once off;
-        sub_filter_types text/html;
+        sub_filter_types text/html text/css application/javascript text/javascript;
         sub_filter '<title>atvloadly</title>' '<title>atvloadly</title><script>(function(){var p=window.location.pathname||"/";if(!p.endsWith("/"))p+="/";var b=document.createElement("base");b.href=p;document.head.appendChild(b);}())</script><script src="ingress-shim.js"></script>';
         sub_filter 'href="/assets/' 'href="assets/';
         sub_filter 'src="/assets/' 'src="assets/';
         sub_filter 'href="/img/' 'href="img/';
         sub_filter 'src="/img/' 'src="img/';
+        # Vite's code-split modules use absolute asset URLs. Relative URLs
+        # resolve against the already-ingressed module path.
+        sub_filter '"/assets/' '"./';
+        sub_filter "'/assets/" "'./";
         proxy_pass http://127.0.0.1:${service_port};
     }
 }
@@ -150,19 +154,68 @@ dbus-daemon --system --fork --nopidfile
 avahi-daemon --daemonize --no-chroot
 /etc/init.d/usbmuxd start
 
-bashio::log.info "Starting atvloadly on 0.0.0.0:${service_port}"
-/usr/bin/atvloadly server -c "${config_path}" &
-atvloadly_pid=$!
+atvloadly_pid=""
+nginx_pid=""
+shutdown_requested=0
+restart_delay=2
+atvloadly_started_at=0
 
-cleanup() {
-  if kill -0 "${atvloadly_pid}" 2>/dev/null; then
-    kill "${atvloadly_pid}" 2>/dev/null || true
-    wait "${atvloadly_pid}" 2>/dev/null || true
+start_atvloadly() {
+  bashio::log.info "Starting atvloadly on 0.0.0.0:${service_port}"
+  /usr/bin/atvloadly server -c "${config_path}" &
+  atvloadly_pid=$!
+  atvloadly_started_at="$(date +%s)"
+}
+
+stop_process() {
+  local pid="${1:-}"
+  if [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null; then
+    kill "${pid}" 2>/dev/null || true
   fi
 }
 
-trap cleanup EXIT INT TERM
+cleanup() {
+  shutdown_requested=1
+  stop_process "${nginx_pid}"
+  stop_process "${atvloadly_pid}"
+}
+
+handle_signal() {
+  cleanup
+  exit 143
+}
+
+trap cleanup EXIT
+trap handle_signal INT TERM
 
 bashio::log.info "Starting ingress proxy on 127.0.0.1:${ingress_proxy_port} -> 127.0.0.1:${service_port}"
 
-exec nginx -g 'daemon off;'
+nginx -g 'daemon off;' &
+nginx_pid=$!
+start_atvloadly
+
+while (( shutdown_requested == 0 )); do
+  completed_pid=""
+  if wait -n -p completed_pid "${nginx_pid}" "${atvloadly_pid}"; then
+    exit_code=0
+  else
+    exit_code=$?
+  fi
+
+  if [[ "${completed_pid}" == "${nginx_pid}" ]]; then
+    bashio::log.error "Ingress proxy exited with status ${exit_code}"
+    exit "${exit_code}"
+  fi
+
+  if (( $(date +%s) - atvloadly_started_at >= 300 )); then
+    restart_delay=2
+  fi
+  bashio::log.error "atvloadly exited with status ${exit_code}; restarting in ${restart_delay}s"
+  atvloadly_pid=""
+  if ! /etc/init.d/usbmuxd restart; then
+    bashio::log.warning "Unable to restart usbmuxd after atvloadly exit"
+  fi
+  sleep "${restart_delay}"
+  (( restart_delay < 60 )) && restart_delay=$((restart_delay * 2))
+  start_atvloadly
+done
