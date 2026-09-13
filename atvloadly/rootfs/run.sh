@@ -73,6 +73,7 @@ cat > /etc/nginx/conf.d/ingress.conf <<EOF
 server {
     listen 8099;
     server_name _;
+    merge_slashes on;
 
     client_max_body_size 0;
     proxy_http_version 1.1;
@@ -100,7 +101,7 @@ server {
         proxy_set_header Connection "upgrade";
         sub_filter_once off;
         sub_filter_types text/html text/css application/javascript text/javascript;
-        sub_filter '<title>atvloadly</title>' '<title>atvloadly</title><script>(function(){var p=window.location.pathname||"/";if(!p.endsWith("/"))p+="/";var b=document.createElement("base");b.href=p;document.head.appendChild(b);}())</script><script src="ingress-shim.js"></script>';
+        sub_filter '<title>atvloadly</title>' '<title>atvloadly</title><script>(function(){var p=window.location.pathname||"/";while(p.endsWith("//"))p=p.slice(0,-1);if(!p.endsWith("/"))p+="/";var b=document.createElement("base");b.href=p;document.head.appendChild(b);}())</script><script src="ingress-shim.js"></script>';
         sub_filter 'href="/assets/' 'href="assets/';
         sub_filter 'src="/assets/' 'src="assets/';
         sub_filter 'href="/img/' 'href="img/';
@@ -109,6 +110,8 @@ server {
         # resolve against the already-ingressed module path.
         sub_filter '"/assets/' '"./';
         sub_filter "'/assets/" "'./";
+        # ingress_entry: / can leave an extra leading slash before API paths.
+        rewrite ^//+(.*)$ /$1 break;
         proxy_pass http://127.0.0.1:${service_port};
     }
 }

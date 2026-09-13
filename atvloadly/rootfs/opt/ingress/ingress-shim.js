@@ -1,10 +1,17 @@
 (function () {
   var path = window.location.pathname || "";
-  var ingressBase = path.endsWith("/") ? path.slice(0, -1) : path;
+  var ingressBase = path;
+  while (ingressBase.length > 1 && ingressBase.endsWith("/")) {
+    ingressBase = ingressBase.slice(0, -1);
+  }
+  if (ingressBase === "/") {
+    ingressBase = "";
+  }
 
   function shouldRewritePath(value) {
     return (
       typeof value === "string" &&
+      ingressBase &&
       value.startsWith("/") &&
       !value.startsWith("//") &&
       !value.startsWith(ingressBase + "/")
